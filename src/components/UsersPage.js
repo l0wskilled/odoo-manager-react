@@ -9,6 +9,7 @@ import Translation from "../utils/Translation"
 import PubSub from "pubsub-js";
 import Constants from "../Constants";
 import Redirect from "react-router-dom/es/Redirect";
+import Link from "react-router-dom/es/Link";
 
 class ProfilePage extends Component {
     constructor(props) {
@@ -27,6 +28,9 @@ class ProfilePage extends Component {
         let that = this;
         let config = {
             url: "users",
+            params: {
+                limit: 9999
+            },
             method: 'get',
             headers: {
                 "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN")
@@ -97,12 +101,12 @@ class ProfilePage extends Component {
                     </TableBody>
                 </Table>
                 <FlatButton
-                    href="/users/create"
+                    containerElement={<Link to="/users/create"/>}
+                    linkButton={true}
                     label="Create User"
                     secondary={true}
                 />
             </Paper>
-
         );
     }
 }

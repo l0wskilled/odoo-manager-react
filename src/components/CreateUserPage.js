@@ -9,6 +9,7 @@ import Translation from "../utils/Translation"
 import PubSub from "pubsub-js";
 import Constants from "../Constants";
 import "./toggle.css";
+import Redirect from "react-router-dom/es/Redirect";
 
 const containerStyles = {
     fontSize: 16,
@@ -35,9 +36,10 @@ class CreateUserPage extends Component {
             authorised: false,
             id: "",
             lastAccess: [],
-            level: "",
+            level: "User",
             username: "",
-            newPassword: ""
+            newPassword: "",
+            created: false
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -102,21 +104,9 @@ class CreateUserPage extends Component {
         };
         axios(config)
             .then(function (response) {
-                that.setState(({
-                    address: response.data.data.address,
-                    birthday: new Date(response.data.data.birthday),
-                    city: response.data.data.city,
-                    country: response.data.data.country,
-                    email: response.data.data.email,
-                    firstname: response.data.data.firstname,
-                    lastname: response.data.data.lastname,
-                    mobile: response.data.data.mobile,
-                    phone: response.data.data.phone,
-                    authorised: response.data.data.authorised === 1,
-                    id: response.data.data.id,
-                    lastAccess: response.data.data.last_access,
-                    level: response.data.data.level
-                }));
+                that.setState({
+                    created: true
+                });
                 PubSub.publish(Constants.LOADING, false);
                 let message = Translation.translateMessage(response.data.messages);
                 PubSub.publish(Constants.MESSAGE, message);
@@ -135,6 +125,9 @@ class CreateUserPage extends Component {
     }
 
     render() {
+        if (this.state.created)
+            return (<Redirect push to={"/users/"}/>);
+
         return (
             <form onSubmit={this.handleSubmit}>
                 <Paper style={{padding: "2em"}}>
@@ -187,7 +180,7 @@ class CreateUserPage extends Component {
                     <TextField
                         hintText="E-Mail"
                         floatingLabelText="E-Mail"
-                        type="text"
+                        type="email"
                         name="email"
                         required={true}
                         onChange={this.handleInputChange}

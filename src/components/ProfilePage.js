@@ -179,7 +179,7 @@ class ProfilePage extends Component {
                     <TextField
                         hintText="E-Mail"
                         floatingLabelText="E-Mail"
-                        type="text"
+                        type="email"
                         name="email"
                         required={true}
                         onChange={this.handleInputChange}

@@ -11,7 +11,7 @@ import axios from "axios/index";
 import Config from "../Config";
 import ProfilePage from "./ProfilePage";
 import {
-    ActionDashboard, SocialGroup,
+    ActionDashboard, HardwareMemory, SocialGroup,
     SocialPerson
 } from "material-ui/svg-icons/index";
 import DashboardPage from "./DashboardPage";
@@ -21,6 +21,9 @@ import Route from "react-router-dom/es/Route";
 import UsersPage from "./UsersPage";
 import UserPage from "./UserPage";
 import CreateUserPage from "./CreateUserPage";
+import ServersPage from "./ServersPage";
+import ServerPage from "./ServerPage";
+import CreateServerPage from "./CreateServerPage";
 
 
 const SnackbarTimeout = 2000;
@@ -71,8 +74,8 @@ class App extends Component {
             message: data
         });
     }
+
     authenticatedHandler(msg, data) {
-        // console.log("authenticated is: ", data);
         this.setState({
             authenticated: data
         });
@@ -120,7 +123,11 @@ class App extends Component {
                                     backgroundColor: "rgb(237, 236, 236)"
                                 }}
                             >
-                                <main style={{flex: "1 1 auto", padding: "2em", overflow: "auto"}}>
+                                <main style={{
+                                    flex: "1 1 auto",
+                                    padding: "2em",
+                                    overflow: "auto"
+                                }}>
                                     <Route
                                         exact
                                         path="/" component={DashboardPage}
@@ -143,6 +150,21 @@ class App extends Component {
                                         exact
                                         path="/users/create"
                                         component={CreateUserPage}
+                                    />
+                                    <Route
+                                        exact
+                                        path="/servers"
+                                        component={ServersPage}
+                                    />
+                                    <Route
+                                        exact
+                                        path="/server/:id"
+                                        component={ServerPage}
+                                    />
+                                    <Route
+                                        exact
+                                        path="/servers/create"
+                                        component={CreateServerPage}
                                     />
                                 </main>
                                 <aside
@@ -167,17 +189,25 @@ class App extends Component {
                                                 Profile
                                             </MenuItem>
                                         </Link>
-                                        <Divider/>
-                                        {
-                                            sessionStorage.getItem("userLevel") === "Superuser" ?
-                                                <Link to="/users">
-                                                    <MenuItem
-                                                        leftIcon={<SocialGroup/>}>
-                                                        Users
-                                                    </MenuItem>
-                                                </Link> :
-                                                ""
+                                        {sessionStorage.getItem("userLevel") === "Superuser" &&
+                                        <div>
+                                            <Divider/>
+                                            <Link to="/users">
+                                                <MenuItem
+                                                    leftIcon={<SocialGroup/>}>
+                                                    Users
+                                                </MenuItem>
+                                            </Link>
+                                            <Divider/>
+                                            <Link to="/servers">
+                                                <MenuItem
+                                                    leftIcon={<HardwareMemory/>}>
+                                                    Servers
+                                                </MenuItem>
+                                            </Link>
+                                        </div>
                                         }
+                                        <Divider/>
                                     </Drawer>
                                 </aside>
                             </section>
