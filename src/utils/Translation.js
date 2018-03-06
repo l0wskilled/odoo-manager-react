@@ -9,7 +9,7 @@ const translation = {
         THERE_IS_ALREADY_A_RECORD_WITH_THAT_NAME: "There is already a record with that name",
         UPDATED_SUCCESSFULLY: "Updated successfully",
         DELETED_SUCCESSFULLY: "Deleted successfully",
-        THERE_HAS_BEEN_AN_ERROR: "There has been an valid",
+        THERE_HAS_BEEN_AN_ERROR: "There has been an error",
         INCOMPLETE_DATA_RECEIVED: "Incomplete data received",
         NO_RECORDS: "No records",
         COULD_NOT_BE_CREATED: "Could not be created",
