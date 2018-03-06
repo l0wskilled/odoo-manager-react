@@ -90,9 +90,7 @@ class ProfilePage extends Component {
                 open: false
             });
         } else {
-            console.log(this.state);
             if (this.valid(this.state.current_password, this.state.new_password, this.state.new_password2)) {
-            console.log("Hello");
                 PubSub.publish(Constants.LOADING, true);
                 let config = {
                     url: "profile/change-password",
