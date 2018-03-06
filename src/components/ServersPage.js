@@ -112,12 +112,14 @@ class ServersPage extends Component {
         };
         axios(config)
             .then(function (response) {
-                PubSub.publish(Constants.LOADING, false);
                 that.setState({
                     open: false,
                     del: null
                 });
                 that.componentDidMount();
+                PubSub.publish(Constants.LOADING, false);
+                let message = Translation.translateMessage(response.data.messages);
+                PubSub.publish(Constants.MESSAGE, message);
             })
             .catch(function (error) {
                 if (error.response) {
