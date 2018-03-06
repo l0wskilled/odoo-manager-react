@@ -1,13 +1,26 @@
 import React, {Component} from "react";
 import axios from "axios";
 import {
-    DatePicker, Paper, RaisedButton, Table, TableBody, TableHeader, TableHeaderColumn, TableRow,
+    DatePicker,
+    MenuItem, Paper, RaisedButton, SelectField, Table, TableBody, TableHeader,
+    TableHeaderColumn, TableRow,
     TableRowColumn, TextField,
+    Toggle,
 } from "material-ui";
 import Translation from "../utils/Translation"
 import PubSub from "pubsub-js";
 import Constants from "../Constants";
 import NewPassword from "./NewPassword";
+import "./toggle.css";
+
+const containerStyles = {
+    fontSize: 16,
+    lineHeight: '24px',
+    width: 256,
+    height: 24 + 48,
+    display: 'inline-block',
+    position: 'relative',
+};
 
 class UserPage extends Component {
     constructor(props) {
@@ -22,19 +35,44 @@ class UserPage extends Component {
             lastname: "",
             mobile: "",
             phone: "",
-            authorised: "",
+            authorised: false,
             id: "",
             lastAccess: [],
             level: ""
         };
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleInputChange = this.handleInputChange.bind(this);
         this.handleBirthday = this.handleBirthday.bind(this);
+        this.handleToggle = this.handleToggle.bind(this);
+        this.handleSelect = this.handleSelect.bind(this);
     }
 
-    handleBirthday(event, date) {
-        console.log(this.state.lastAccess);
+    handleInputChange(event) {
+        const target = event.target;
+        const value = target.value;
+        const name = target.name;
         this.setState({
-            birthday: date
+            [name]: value
         });
+    }
+
+
+    handleBirthday(event, date) {
+        this.setState({
+            birthday: new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+        });
+    }
+
+    handleToggle(event, isInputChecked) {
+        this.setState((prevState, props) => ({
+            authorised: !prevState.authorised
+        }))
+    }
+
+    handleSelect(event, index, value) {
+        this.setState({
+            level: value
+        })
     }
 
     componentDidMount() {
@@ -51,9 +89,10 @@ class UserPage extends Component {
         };
         axios(config)
             .then(function (response) {
+                let birthday = Date.UTC(response.data.data.birthday.split("-")[0], response.data.data.birthday.split("-")[1] - 1, response.data.data.birthday.split("-")[2]);
                 that.setState(({
                     address: response.data.data.address,
-                    birthday: new Date(response.data.data.birthday),
+                    birthday: new Date(birthday),
                     city: response.data.data.city,
                     country: response.data.data.country,
                     email: response.data.data.email,
@@ -63,7 +102,7 @@ class UserPage extends Component {
                     phone: response.data.data.phone,
                     authorised: response.data.data.authorised === 1,
                     id: response.data.data.id,
-                    lastAccess: response.data.data.last_access,
+                    lastAccess: typeof response.data.data.last_access == 'string' ? [response.data.data.last_access] : response.data.data.last_access,
                     level: response.data.data.level
                 }));
                 PubSub.publish(Constants.LOADING, false);
@@ -85,17 +124,6 @@ class UserPage extends Component {
         const id = parseInt(this.props.match.params.id, 10);
 
         event.preventDefault();
-        if (this.state.firstname.length < 1
-            || this.state.lastname.length < 1
-            || this.state.email.length < 1) {
-            if (this.state.firstname.length < 1)
-                this.setState({errorFirstname: "First Name is required"});
-            if (this.state.lastname.length < 1)
-                this.setState({errorLastname: "Last Name is required"});
-            if (this.state.email.length < 1)
-                this.setState({errorEmail: "E-Mail is required"});
-            return;
-        }
         let that = this;
         PubSub.publish(Constants.LOADING, true);
         let config = {
@@ -103,7 +131,7 @@ class UserPage extends Component {
             method: 'patch',
             data: {
                 address: String(this.state.address),
-                birthday: String(new Date(this.state.birthday).toISOString().split("T")[0]),
+                birthday: String(this.state.birthday.toISOString().split("T")[0]),
                 city: String(this.state.city),
                 country: String(this.state.country),
                 email: String(this.state.email),
@@ -111,6 +139,7 @@ class UserPage extends Component {
                 lastname: String(this.state.lastname),
                 mobile: String(this.state.mobile),
                 phone: String(this.state.phone),
+                level: String(this.state.level),
                 authorised: this.state.authorised ? 1 : 0
             },
             headers: {
@@ -132,7 +161,6 @@ class UserPage extends Component {
                     phone: response.data.data.phone,
                     authorised: response.data.data.authorised === 1,
                     id: response.data.data.id,
-                    lastAccess: response.data.data.last_access,
                     level: response.data.data.level
                 }));
                 PubSub.publish(Constants.LOADING, false);
@@ -154,6 +182,7 @@ class UserPage extends Component {
 
     render() {
         const id = parseInt(this.props.match.params.id, 10);
+
         return (
             <form onSubmit={this.handleSubmit}>
                 <Paper style={{padding: "2em"}}>
@@ -168,16 +197,14 @@ class UserPage extends Component {
                         value={this.state.id}
                         disabled={true}
                     /><br/>
-                    <TextField
-                        hintText="Level"
+                    <SelectField
                         floatingLabelText="Level"
-                        type="text"
-                        name="level"
-                        required={true}
-                        onChange={this.handleInputChange}
                         value={this.state.level}
-                        disabled={true}
-                    /><br/>
+                        onChange={this.handleSelect}
+                        required={true}>
+                        <MenuItem value="User" primaryText="User"/>
+                        <MenuItem value="Superuser" primaryText="Superuser"/>
+                    </SelectField><br/>
                     <TextField
                         hintText="First Name"
                         floatingLabelText="First Name"
@@ -186,7 +213,6 @@ class UserPage extends Component {
                         required={true}
                         onChange={this.handleInputChange}
                         value={this.state.firstname}
-                        errorText={this.state.errorFirstname}
                     /><br/>
                     <TextField
                         hintText="Last Name"
@@ -196,7 +222,6 @@ class UserPage extends Component {
                         required={true}
                         onChange={this.handleInputChange}
                         value={this.state.lastname}
-                        errorText={this.state.errorLastname}
                     /><br/>
                     <TextField
                         hintText="E-Mail"
@@ -206,7 +231,6 @@ class UserPage extends Component {
                         required={true}
                         onChange={this.handleInputChange}
                         value={this.state.email}
-                        errorText={this.state.errorEmail}
                     /><br/>
                     <TextField
                         hintText="Phone"
@@ -225,12 +249,12 @@ class UserPage extends Component {
                         value={this.state.mobile}
                     /><br/>
                     <TextField
-                        hintText="Country"
-                        floatingLabelText="Country"
+                        hintText="Address"
+                        floatingLabelText="Address"
                         type="text"
-                        name="country"
+                        name="address"
                         onChange={this.handleInputChange}
-                        value={this.state.country}
+                        value={this.state.address}
                     /><br/>
                     <TextField
                         hintText="City"
@@ -239,6 +263,14 @@ class UserPage extends Component {
                         name="city"
                         onChange={this.handleInputChange}
                         value={this.state.city}
+                    /><br/>
+                    <TextField
+                        hintText="Country"
+                        floatingLabelText="Country"
+                        type="text"
+                        name="country"
+                        onChange={this.handleInputChange}
+                        value={this.state.country}
                     /><br/>
                     <DatePicker
                         mode="landscape"
@@ -253,13 +285,13 @@ class UserPage extends Component {
                             year: 'numeric',
                         }).format}
                     />
-                    <TextField
-                        hintText="Address"
-                        floatingLabelText="Address"
-                        type="text"
-                        name="address"
-                        onChange={this.handleInputChange}
-                        value={this.state.address}
+                    <Toggle
+                        className="toggle"
+                        style={containerStyles}
+                        label="Authorized"
+                        labelPosition="right"
+                        onToggle={this.handleToggle}
+                        toggled={this.state.authorised}
                     /><br/>
                     <RaisedButton
                         label="Save Changes"
@@ -269,20 +301,17 @@ class UserPage extends Component {
                     />
                     <NewPassword adminMode={true} userId={id}/>
                     <br/>
-                    <h2>Last Access</h2>
+                    <h2>Last Access (UTC)</h2>
                     {typeof this.state.lastAccess !== "undefined" ?
-                        <Table>
-                            <TableHeader displaySelectAll={false}
-                                         adjustForCheckbox={false}>
+                        <Table style={{tableLayout: "auto"}} wrapperStyle={{background: "red"}} className="TEST">
+                            <TableBody displayRowCheckbox={false}
+                                       showRowHover={true}>
                                 <TableRow>
                                     <TableHeaderColumn>Date</TableHeaderColumn>
                                     <TableHeaderColumn>IP</TableHeaderColumn>
                                     <TableHeaderColumn>Domain</TableHeaderColumn>
                                     <TableHeaderColumn>Browser</TableHeaderColumn>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody displayRowCheckbox={false}
-                                       showRowHover={true}>
                                 {this.state.lastAccess.map((row, index) => (
                                     <TableRow key={index} selectable={false}>
                                         <TableRowColumn>{row.date}</TableRowColumn>
