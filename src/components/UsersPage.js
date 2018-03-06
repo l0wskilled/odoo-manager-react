@@ -1,7 +1,8 @@
 import React, {Component} from "react";
 import axios from "axios";
 import {
-    Paper,Table, TableBody, TableHeader, TableHeaderColumn, TableRow,
+    FlatButton,
+    Paper, Table, TableBody, TableHeader, TableHeaderColumn, TableRow,
     TableRowColumn,
 } from "material-ui";
 import Translation from "../utils/Translation"
@@ -54,9 +55,12 @@ class ProfilePage extends Component {
     }
 
     onCellClick(row, col) {
-        this.setState({
-            redirect: this.state.users[row].id
-        });
+        let loading = PubSub.subscribe(Constants.LOADING);
+        if (!loading) {
+            this.setState({
+                redirect: this.state.users[row-1].id
+            });
+        }
     }
 
     render() {
@@ -67,29 +71,36 @@ class ProfilePage extends Component {
         return (
             <Paper style={{padding: "2em"}}>
                 <h1>Users</h1>
-                <Table onCellClick={this.onCellClick}>
-                    <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
+                <Table onCellClick={this.onCellClick} style={{tableLayout: "auto"}}>
+                    <TableBody displayRowCheckbox={false} showRowHover={true}>
                         <TableRow>
                             <TableHeaderColumn>ID</TableHeaderColumn>
+                            <TableHeaderColumn>First Name</TableHeaderColumn>
+                            <TableHeaderColumn>Last Name</TableHeaderColumn>
                             <TableHeaderColumn>Username</TableHeaderColumn>
                             <TableHeaderColumn>E-Mail</TableHeaderColumn>
                             <TableHeaderColumn>Level</TableHeaderColumn>
                             <TableHeaderColumn>Authorized</TableHeaderColumn>
                         </TableRow>
-                    </TableHeader>
-                    <TableBody displayRowCheckbox={false} showRowHover={true}>
                         {this.state.users.map((row, index) => (
                             <TableRow key={index} style={{cursor: "pointer"}}>
                                 <TableRowColumn>{row.id}</TableRowColumn>
+                                <TableRowColumn>{row.firstname}</TableRowColumn>
+                                <TableRowColumn>{row.lastname}</TableRowColumn>
                                 <TableRowColumn>{row.username}</TableRowColumn>
                                 <TableRowColumn>{row.email}</TableRowColumn>
                                 <TableRowColumn>{row.level}</TableRowColumn>
-                                <TableRowColumn>{row.authorized === 1 ? "True" : "False"}</TableRowColumn>
+                                <TableRowColumn>{row.authorised === 1 ? "True" : "False"}</TableRowColumn>
 
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
+                <FlatButton
+                    href="/users/create"
+                    label="Create User"
+                    secondary={true}
+                />
             </Paper>
 
         );

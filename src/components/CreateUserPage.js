@@ -2,16 +2,24 @@ import React, {Component} from "react";
 import axios from "axios";
 import {
     DatePicker,
-    Paper,
-    RaisedButton,
-    TextField
+    MenuItem, Paper, RaisedButton, SelectField, TextField,
+    Toggle,
 } from "material-ui";
 import Translation from "../utils/Translation"
 import PubSub from "pubsub-js";
 import Constants from "../Constants";
-import NewPassword from "./NewPassword";
+import "./toggle.css";
 
-class ProfilePage extends Component {
+const containerStyles = {
+    fontSize: 16,
+    lineHeight: '24px',
+    width: 256,
+    height: 24 + 48,
+    display: 'inline-block',
+    position: 'relative',
+};
+
+class CreateUserPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -24,58 +32,18 @@ class ProfilePage extends Component {
             lastname: "",
             mobile: "",
             phone: "",
-            errorEmail: "",
-            errorFirstname: "",
-            errorLastname: "",
+            authorised: false,
+            id: "",
+            lastAccess: [],
+            level: "",
+            username: "",
+            newPassword: ""
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleBirthday = this.handleBirthday.bind(this);
-    }
-
-    componentDidMount() {
-        PubSub.publish(Constants.LOADING, true);
-        let that = this;
-        let config = {
-            url: "profile",
-            method: 'get',
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN")
-            }
-        };
-        axios(config)
-            .then(function (response) {
-                let birthday = Date.UTC(response.data.data.birthday.split("-")[0],response.data.data.birthday.split("-")[1] - 1,response.data.data.birthday.split("-")[2]);
-                that.setState(({
-                    address: String(response.data.data.address),
-                    birthday: new Date(birthday),
-                    city: String(response.data.data.city),
-                    country: String(response.data.data.country),
-                    email: String(response.data.data.email),
-                    firstname: String(response.data.data.firstname),
-                    lastname: String(response.data.data.lastname),
-                    mobile: String(response.data.data.mobile),
-                    phone: String(response.data.data.phone),
-                }));
-                PubSub.publish(Constants.LOADING, false);
-            })
-            .catch(function (error) {
-                if (error.response) {
-                    let message = Translation.translateMessage(error.response.data.messages);
-                    PubSub.publish(Constants.MESSAGE, message);
-                } else if (error.request) {
-                    console.log(error.request);
-                } else {
-                    console.log('Error', error.message);
-                }
-                PubSub.publish(Constants.LOADING, false);
-            });
-    }
-
-    handleBirthday(event, date) {
-        this.setState({
-            birthday: new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
-        });
+        this.handleToggle = this.handleToggle.bind(this);
+        this.handleSelect = this.handleSelect.bind(this);
     }
 
     handleInputChange(event) {
@@ -87,24 +55,31 @@ class ProfilePage extends Component {
         });
     }
 
+    handleBirthday(event, date) {
+        this.setState({
+            birthday: new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+        });
+    }
+
+    handleToggle(event, isInputChecked) {
+        this.setState((prevState, props) => ({
+            authorised: !prevState.authorised
+        }))
+    }
+
+    handleSelect(event, index, value) {
+        this.setState({
+            level: value
+        })
+    }
+
     handleSubmit(event) {
         event.preventDefault();
-        if (this.state.firstname.length < 1
-            || this.state.lastname.length < 1
-            || this.state.email.length < 1) {
-            if (this.state.firstname.length < 1)
-                this.setState({errorFirstname: "First Name is required"});
-            if (this.state.lastname.length < 1)
-                this.setState({errorLastname: "Last Name is required"});
-            if (this.state.email.length < 1)
-                this.setState({errorEmail: "E-Mail is required"});
-            return;
-        }
         let that = this;
         PubSub.publish(Constants.LOADING, true);
         let config = {
-            url: "profile/update",
-            method: 'patch',
+            url: "users/create/",
+            method: 'post',
             data: {
                 address: String(this.state.address),
                 birthday: String(new Date(this.state.birthday).toISOString().split("T")[0]),
@@ -113,8 +88,12 @@ class ProfilePage extends Component {
                 email: String(this.state.email),
                 firstname: String(this.state.firstname),
                 lastname: String(this.state.lastname),
+                username: String(this.state.username),
+                newPassword: String(this.state.newPassword),
                 mobile: String(this.state.mobile),
                 phone: String(this.state.phone),
+                level: String(this.state.level),
+                authorised: this.state.authorised ? 1 : 0
             },
             headers: {
                 "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN"),
@@ -124,15 +103,19 @@ class ProfilePage extends Component {
         axios(config)
             .then(function (response) {
                 that.setState(({
-                    address: String(response.data.data.address),
+                    address: response.data.data.address,
                     birthday: new Date(response.data.data.birthday),
-                    city: String(response.data.data.city),
-                    country: String(response.data.data.country),
-                    email: String(response.data.data.email),
-                    firstname: String(response.data.data.firstname),
-                    lastname: String(response.data.data.lastname),
-                    mobile: String(response.data.data.mobile),
-                    phone: String(response.data.data.phone),
+                    city: response.data.data.city,
+                    country: response.data.data.country,
+                    email: response.data.data.email,
+                    firstname: response.data.data.firstname,
+                    lastname: response.data.data.lastname,
+                    mobile: response.data.data.mobile,
+                    phone: response.data.data.phone,
+                    authorised: response.data.data.authorised === 1,
+                    id: response.data.data.id,
+                    lastAccess: response.data.data.last_access,
+                    level: response.data.data.level
                 }));
                 PubSub.publish(Constants.LOADING, false);
                 let message = Translation.translateMessage(response.data.messages);
@@ -156,6 +139,14 @@ class ProfilePage extends Component {
             <form onSubmit={this.handleSubmit}>
                 <Paper style={{padding: "2em"}}>
                     <h1>{this.state.firstname}'s Profile</h1>
+                    <SelectField
+                        floatingLabelText="Level"
+                        value={this.state.level}
+                        onChange={this.handleSelect}
+                        required={true}>
+                        <MenuItem value="User" primaryText="User"/>
+                        <MenuItem value="Superuser" primaryText="Superuser"/>
+                    </SelectField><br/>
                     <TextField
                         hintText="First Name"
                         floatingLabelText="First Name"
@@ -164,7 +155,6 @@ class ProfilePage extends Component {
                         required={true}
                         onChange={this.handleInputChange}
                         value={this.state.firstname}
-                        errorText={this.state.errorFirstname}
                     /><br/>
                     <TextField
                         hintText="Last Name"
@@ -177,6 +167,24 @@ class ProfilePage extends Component {
                         errorText={this.state.errorLastname}
                     /><br/>
                     <TextField
+                        hintText="Username"
+                        floatingLabelText="Username"
+                        type="text"
+                        name="username"
+                        required={true}
+                        onChange={this.handleInputChange}
+                        value={this.state.username}
+                    /><br/>
+                    <TextField
+                        hintText="New Password"
+                        floatingLabelText="New Password"
+                        type="password"
+                        name="newPassword"
+                        required={true}
+                        onChange={this.handleInputChange}
+                        value={this.state.newPassword}
+                    /><br/>
+                    <TextField
                         hintText="E-Mail"
                         floatingLabelText="E-Mail"
                         type="text"
@@ -184,7 +192,6 @@ class ProfilePage extends Component {
                         required={true}
                         onChange={this.handleInputChange}
                         value={this.state.email}
-                        errorText={this.state.errorEmail}
                     /><br/>
                     <TextField
                         hintText="Phone"
@@ -239,16 +246,24 @@ class ProfilePage extends Component {
                             year: 'numeric',
                         }).format}
                     />
+                    <Toggle
+                        className="toggle"
+                        style={containerStyles}
+                        label="Authorized"
+                        labelPosition="right"
+                        onToggle={this.handleToggle}
+                        toggled={this.state.authorised}
+                    /><br/>
                     <RaisedButton
                         label="Save Changes"
                         primary={true}
                         style={{marginTop: "2em"}}
                         type="submit"
-                    /><NewPassword adminMode={false}/>
+                    />
                 </Paper>
             </form>
         );
     }
 }
 
-export default ProfilePage;
+export default CreateUserPage;

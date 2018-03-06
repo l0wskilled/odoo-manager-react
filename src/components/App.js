@@ -20,6 +20,7 @@ import Constants from "../Constants";
 import Route from "react-router-dom/es/Route";
 import UsersPage from "./UsersPage";
 import UserPage from "./UserPage";
+import CreateUserPage from "./CreateUserPage";
 
 
 const SnackbarTimeout = 2000;
@@ -129,12 +130,19 @@ class App extends Component {
                                         component={ProfilePage}
                                     />
                                     <Route
+                                        exact
                                         path="/users"
                                         component={UsersPage}
                                     />
                                     <Route
+                                        exact
                                         path="/user/:id"
                                         component={UserPage}
+                                    />
+                                    <Route
+                                        exact
+                                        path="/users/create"
+                                        component={CreateUserPage}
                                     />
                                 </main>
                                 <aside
