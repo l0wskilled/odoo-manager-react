@@ -39,9 +39,6 @@ class ProfilePage extends Component {
         let config = {
             url: "profile",
             method: 'get',
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN")
-            }
         };
         axios(config)
             .then(function (response) {
@@ -116,9 +113,6 @@ class ProfilePage extends Component {
                 mobile: String(this.state.mobile),
                 phone: String(this.state.phone),
             },
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN"),
-            }
         };
         axios(config)
             .then(function (response) {

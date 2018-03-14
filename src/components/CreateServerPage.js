@@ -56,9 +56,6 @@ class CreateServerPage extends Component {
                 localeIp: String(this.state.localeIp),
                 remoteIp: String(this.state.remoteIp),
             },
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN"),
-            }
         };
         axios(config)
             .then(function (response) {

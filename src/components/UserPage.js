@@ -88,9 +88,6 @@ class UserPage extends Component {
         let config = {
             url: "users/get/" + id,
             method: 'get',
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN")
-            }
         };
         axios(config)
             .then(function (response) {
@@ -150,9 +147,6 @@ class UserPage extends Component {
                 authorised: this.state.authorised ? 1 : 0,
                 chips: this.state.chips
             },
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN"),
-            }
         };
         axios(config)
             .then(function (response) {

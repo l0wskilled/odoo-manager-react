@@ -45,9 +45,6 @@ class ServerPage extends Component {
         let config = {
             url: "servers/get/" + id,
             method: 'get',
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN")
-            }
         };
         axios(config)
             .then(function (response) {
@@ -88,9 +85,6 @@ class ServerPage extends Component {
                 remoteIp: this.state.remoteIp,
                 chips: this.state.chips
             },
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN"),
-            }
         };
         axios(config)
             .then(function (response) {

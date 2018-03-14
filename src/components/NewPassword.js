@@ -63,9 +63,6 @@ class ProfilePage extends Component {
                 data: {
                     newPassword: this.state.new_password
                 },
-                headers: {
-                    "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN"),
-                }
             };
             axios(config)
                 .then(function (response) {
@@ -98,9 +95,6 @@ class ProfilePage extends Component {
                         current_password: this.state.current_password,
                         new_password: this.state.new_password
                     },
-                    headers: {
-                        "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN"),
-                    }
                 };
                 axios(config)
                     .then(function (response) {

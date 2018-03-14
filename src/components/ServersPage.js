@@ -42,9 +42,6 @@ class ServersPage extends Component {
                 limit: 9999
             },
             method: 'get',
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN")
-            }
         };
         axios(config)
             .then(function (response) {
@@ -105,9 +102,6 @@ class ServersPage extends Component {
         let config = {
             url: "servers/delete/" + id,
             method: 'delete',
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN")
-            }
         };
         axios(config)
             .then(function (response) {

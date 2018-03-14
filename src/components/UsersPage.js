@@ -32,9 +32,6 @@ class ProfilePage extends Component {
                 limit: 9999
             },
             method: 'get',
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN")
-            }
         };
         axios(config)
             .then(function (response) {

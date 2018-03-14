@@ -31,6 +31,7 @@ const SnackbarTimeout = 2000;
 axios.defaults.baseURL = Config.API_ROOT;
 axios.interceptors.request.use((config) => {
     config.headers['Content-Type'] = "application/json";
+    config.headers['Authorization'] = "Bearer " + sessionStorage.getItem("AUTH_TOKEN");
     return config;
 }, error => Promise.reject(error));
 
@@ -130,36 +131,40 @@ class App extends Component {
                                         path="/profile"
                                         component={ProfilePage}
                                     />
-                                    <Route
-                                        exact
-                                        path="/users"
-                                        component={UsersPage}
-                                    />
-                                    <Route
-                                        exact
-                                        path="/user/:id"
-                                        component={UserPage}
-                                    />
-                                    <Route
-                                        exact
-                                        path="/users/create"
-                                        component={CreateUserPage}
-                                    />
-                                    <Route
-                                        exact
-                                        path="/servers"
-                                        component={ServersPage}
-                                    />
-                                    <Route
-                                        exact
-                                        path="/server/:id"
-                                        component={ServerPage}
-                                    />
-                                    <Route
-                                        exact
-                                        path="/servers/create"
-                                        component={CreateServerPage}
-                                    />
+                                    {sessionStorage.getItem("userLevel") === "Superuser" &&
+                                    <div>
+                                        <Route
+                                            exact
+                                            path="/users"
+                                            component={UsersPage}
+                                        />
+                                        <Route
+                                            exact
+                                            path="/user/:id"
+                                            component={UserPage}
+                                        />
+                                        <Route
+                                            exact
+                                            path="/users/create"
+                                            component={CreateUserPage}
+                                        />
+                                        <Route
+                                            exact
+                                            path="/servers"
+                                            component={ServersPage}
+                                        />
+                                        <Route
+                                            exact
+                                            path="/server/:id"
+                                            component={ServerPage}
+                                        />
+                                        <Route
+                                            exact
+                                            path="/servers/create"
+                                            component={CreateServerPage}
+                                        />
+                                    </div>
+                                    }
                                 </main>
                                 <aside
                                     style={{order: -1, flex: "0 1 256px"}}

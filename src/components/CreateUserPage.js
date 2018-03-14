@@ -97,9 +97,6 @@ class CreateUserPage extends Component {
                 level: String(this.state.level),
                 authorised: this.state.authorised ? 1 : 0
             },
-            headers: {
-                "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN"),
-            }
         };
         axios(config)
             .then(function (response) {
