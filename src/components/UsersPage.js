@@ -102,7 +102,6 @@ class ProfilePage extends Component {
                 </Table>
                 <FlatButton
                     containerElement={<Link to="/users/create"/>}
-                    linkButton={true}
                     label="Create User"
                     secondary={true}
                 />

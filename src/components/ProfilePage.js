@@ -118,7 +118,6 @@ class ProfilePage extends Component {
             },
             headers: {
                 "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN"),
-                "Content-Type": "application/x-www-form-urlencoded"
             }
         };
         axios(config)

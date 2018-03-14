@@ -98,8 +98,7 @@ class ServersPage extends Component {
     };
 
 
-    delete()
-    {
+    delete() {
         const id = this.state.del;
         PubSub.publish(Constants.LOADING, true);
         let that = this;
@@ -171,7 +170,7 @@ class ServersPage extends Component {
                                 <TableRowColumn>
                                     <FlatButton
                                         icon={<ActionDelete/>}
-                                        secondary={true}
+                                        primary={true}
                                     />
                                 </TableRowColumn>
                             </TableRow>
@@ -180,7 +179,6 @@ class ServersPage extends Component {
                 </Table>
                 <FlatButton
                     containerElement={<Link to="/servers/create"/>}
-                    linkButton={true}
                     label="Create Server"
                     secondary={true}
                 />

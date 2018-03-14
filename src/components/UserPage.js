@@ -12,6 +12,7 @@ import PubSub from "pubsub-js";
 import Constants from "../Constants";
 import NewPassword from "./NewPassword";
 import "./toggle.css";
+import ChipInput from 'material-ui-chip-input'
 
 const containerStyles = {
     fontSize: 16,
@@ -38,13 +39,18 @@ class UserPage extends Component {
             authorised: false,
             id: "",
             lastAccess: [],
-            level: ""
+            level: "",
+            chips: [],
+            chipSource: [],
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleBirthday = this.handleBirthday.bind(this);
         this.handleToggle = this.handleToggle.bind(this);
         this.handleSelect = this.handleSelect.bind(this);
+        this.handleAddChip = this.handleAddChip.bind(this);
+        this.handleDeleteChip = this.handleDeleteChip.bind(this);
+        this.handleOnBeforeRequestAdd = this.handleOnBeforeRequestAdd.bind(this);
     }
 
     handleInputChange(event) {
@@ -62,7 +68,6 @@ class UserPage extends Component {
             birthday: new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
         });
     }
-
     handleToggle(event, isInputChecked) {
         this.setState((prevState, props) => ({
             authorised: !prevState.authorised
@@ -103,7 +108,9 @@ class UserPage extends Component {
                     authorised: response.data.data.authorised === 1,
                     id: response.data.data.id,
                     lastAccess: typeof response.data.data.last_access == 'string' ? [response.data.data.last_access] : response.data.data.last_access,
-                    level: response.data.data.level
+                    level: response.data.data.level,
+                    chipSource: response.data.data.chipSource,
+                    chips: response.data.data.chips
                 }));
                 PubSub.publish(Constants.LOADING, false);
             })
@@ -130,21 +137,21 @@ class UserPage extends Component {
             url: "users/update/" + id,
             method: 'patch',
             data: {
-                address: String(this.state.address),
-                birthday: String(this.state.birthday.toISOString().split("T")[0]),
-                city: String(this.state.city),
-                country: String(this.state.country),
-                email: String(this.state.email),
-                firstname: String(this.state.firstname),
-                lastname: String(this.state.lastname),
-                mobile: String(this.state.mobile),
-                phone: String(this.state.phone),
-                level: String(this.state.level),
-                authorised: this.state.authorised ? 1 : 0
+                address: this.state.address,
+                birthday: this.state.birthday.toISOString().split("T")[0],
+                city: this.state.city,
+                country: this.state.country,
+                email: this.state.email,
+                firstname: this.state.firstname,
+                lastname: this.state.lastname,
+                mobile: this.state.mobile,
+                phone: this.state.phone,
+                level: this.state.level,
+                authorised: this.state.authorised ? 1 : 0,
+                chips: this.state.chips
             },
             headers: {
                 "Authorization": "Bearer " + sessionStorage.getItem("AUTH_TOKEN"),
-                "Content-Type": "application/x-www-form-urlencoded"
             }
         };
         axios(config)
@@ -161,7 +168,9 @@ class UserPage extends Component {
                     phone: response.data.data.phone,
                     authorised: response.data.data.authorised === 1,
                     id: response.data.data.id,
-                    level: response.data.data.level
+                    level: response.data.data.level,
+                    chipSource: response.data.data.chipSource,
+                    chips: response.data.data.chips
                 }));
                 PubSub.publish(Constants.LOADING, false);
                 let message = Translation.translateMessage(response.data.messages);
@@ -178,6 +187,31 @@ class UserPage extends Component {
                 }
                 PubSub.publish(Constants.LOADING, false);
             });
+    }
+
+    handleAddChip(chip) {
+        if (chip.id !== parseInt(chip.id, 10))
+            return;
+        let found = true;
+        this.state.chipSource.forEach((element) => {
+            if (found)
+                found = element.id === chip.id;
+        });
+        this.setState(prevState => ({
+            chips: [...prevState.chips, chip]
+        }))
+    }
+
+    handleOnBeforeRequestAdd(chip) {
+        return chip.id === parseInt(chip.id, 10)
+    }
+
+    handleDeleteChip(chip, index) {
+        let newArray = [...this.state.chips];
+        newArray.splice(index, 1);
+        this.setState({
+            chips: newArray
+        })
     }
 
     render() {
@@ -292,6 +326,18 @@ class UserPage extends Component {
                         labelPosition="right"
                         onToggle={this.handleToggle}
                         toggled={this.state.authorised}
+                    /><br/>
+                    <ChipInput
+                        fullWidth={true}
+                        hintText="Assigned Servers"
+                        floatingLabelText="Assigned Servers"
+                        value={this.state.chips}
+                        onBeforeRequestAdd={this.handleOnBeforeRequestAdd}
+                        onRequestAdd={this.handleAddChip}
+                        onRequestDelete={this.handleDeleteChip}
+                        dataSource={this.state.chipSource}
+                        dataSourceConfig={{text: "name", value: "id"}}
+                        openOnFocus={true}
                     /><br/>
                     <RaisedButton
                         label="Save Changes"

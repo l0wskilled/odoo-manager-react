@@ -30,13 +30,7 @@ const SnackbarTimeout = 2000;
 
 axios.defaults.baseURL = Config.API_ROOT;
 axios.interceptors.request.use((config) => {
-    if (config.headers['Content-Type'] && config.headers['Content-Type'] === 'application/x-www-form-urlencoded') {
-        config.transformRequest = (data) => {
-            const str = [];
-            Object.keys(data).forEach(key => str.push(`${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`));
-            return str.join('&');
-        };
-    }
+    config.headers['Content-Type'] = "application/json";
     return config;
 }, error => Promise.reject(error));
 
